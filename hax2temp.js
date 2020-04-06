@@ -1,9 +1,8 @@
 /*
 Ingressei na Universidade Federal do Rio de Janeiro pela primeira vez em 2011 np curso de bacharelado em física. 
 Apesar de sempre gostar de matemática e física, tive uma formação altamente musical e durante meu tempo livre passei produzindo ou estudando música.
-Ingressei na Universidade Federal do Rio de Janeiro pela primeira vez em 2011 np curso de bacharelado em física. 
-Apesar de sempre gostar de matemática e física, tive uma formação altamente musical e durante meu tempo livre passei produzindo ou estudando música.
 /*
+
 This script is usable in https://www.haxball.com/headless
 Steps:
     1) Copy this script
@@ -12,13 +11,20 @@ Steps:
     4) Enter
     5) IF THIS TAB IS CLOSED THE ROOM WILL BE CLOSED TOO
 */
-geo = {"code": "br"}
-var room = HBInit({ roomName: "Campeonato dos Primos", maxPlayers: 30, password:"coronga", playerName : "Primo", public : false, geo});
+geo = {"code": "br"};
+var room = HBInit({ roomName: "1ª Copinha dos Primos", 
+                    maxPlayers: 12, 
+                    password:"coronga", 
+                    playerName : "Primo",
+                    public : false, 
+                    geo
+                    });
+                    
 room.setDefaultStadium("Classic");
-room.setScoreLimit(3);
-room.setTimeLimit(1);
+room.setScoreLimit(0);
+room.setTimeLimit(3);
  
- 
+
 /*
     Functions
 */
@@ -35,7 +41,7 @@ function clonekick(player){
     players = room.getPlayerList();
     for (i = 0; i < players.length-1; i++){
         if (player.name == players[i].name){
-            room.kickPlayer(player.id,"Ya hay un usuario con este nombre",false);
+            room.kickPlayer(player.id,"Já existe um usuário com esse nome.",false);
         }
     }
 }
@@ -48,42 +54,6 @@ function initPlayerStats(player){
 /*
 for commands
 */
- 
-function gkHelpFun() { // !gkhelp
-    room.sendChat('O jogador mais atrás no início do jogo será considerado o goleiro')
-}
- 
-function gkFun(player){ // !gk
-    if ( gkflag == true ) {
-        if (room.getScores().time < 60){
-            if (player.team == 1) {
-                gk[0] = player;
-            }
-            else if (player.team == 2){
-                gk[1] = player;
-            }
-        }
-    room.sendChat(player.name + " foi selecionado como o goleiro.");
-    return false;
-    }
-    else if ( gkflag == false ) { room.sendChat("Não começou o jogo."); }
-    return;
-}
- 
-function isGk(){ // gives the mosts backward players before the first kickOff
-    var players = room.getPlayerList();
-    var min = players[0];
-    min.position = {x: room.getBallPosition().x + 60}
-    var max = min;
- 
-    for (var i = 0; i < players.length; i++) {
-        if (players[i].position != null){
-            if (min.position.x > players[i].position.x) min = players[i];
-            if (max.position.x < players[i].position.x) max = players[i];
-        }
-    }
-    return [min, max]
-}
  
 function marcadorFun(player){ // !marcador
     if (player.admin == true){
@@ -174,11 +144,66 @@ function swapSet(){
                 room.setPlayerTeam(players[i].id, 1);
             }
         }
+        try {
+            room.sendChat("/colors red " + teamsUniforms[team[blue][name]]) // SET RED TEAM UNIFORM
+            room.sendChat("/colors blue " + teamsUniforms[team[red][name]]) // SET BLUE TEAM UNIFORM
+        }
+        catch (err){
+            room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
+        }
     }
     
 }
+
+var teamsUniforms = {
+    "BabyGotHax": "45 000000 962EFF F2F21F 962EFF",
+    "420BlazeHax": "120 FFFFFF 0080FF 250C77 FFFFFF",
+    "MaconhaFazMal": "0 000000 1AFF00 F7FF00 FF0000",
+    "Punzinho": "90 FFFAFA FF0000 00000 FF0000",
+    "GrandeUniao": "30 000000 0071F2 00F2F2 0071F2",
+    "Quarenteners": "",
+    "StardewBois": "90 304CFF 13FF03 F7FF0A",
+    "NoName": "90 000000 FF0A9D E9FF26 FF0A9D",
+}
+
+function uniformFun(team, uniform){ // !uniform <teamname>  command to change teams uniforms
+    // TO DO
+}
  
+var team;
+var championship = false;
+function startSetFun(player,msg){ // the teams names received in msg must match exactly with the names at teamsUniforms dict ("team1 team2")
+    championship = true;
+    
+    param = msg.split(" ");
+
+    red = param[1]; 
+    blue = param[2];
+
+    team = {red:{
+                name:red,
+                score:0
+            },
+            blue:{
+                name:blue,
+                score:0
+            }};
+
+    try {
+        room.sendChat("/colors red " + teamsUniforms[red]) // SET RED TEAM UNIFORM
+        room.sendChat("/colors blue " + teamsUniforms[blue]) // SET BLUE TEAM UNIFORM
+    }
+    catch (err){
+        room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
+    }
+
+    room.sendChat("Mais um jogo do Campeonato dos primos começará em breve!!");
+    room.sendChat("Jogadores se preparem que o administrador do campeonato os colocará nos times corretos!");
+    room.sendChat(red+" x "+blue);
+
  
+}
+
 function pushMuteFun(player, message){ // !mute Anddy
     // Prevent somebody to talk in the room (uses the nickname, not the id)
     // need to be admin
@@ -186,7 +211,6 @@ function pushMuteFun(player, message){ // !mute Anddy
         if (!(mutedPlayers.includes(message.substr(6)))) mutedPlayers.push(message.substr(6));
     }
 }
- 
  
 function gotMutedFun(player){
     if (mutedPlayers.includes(player.name)){
@@ -211,20 +235,19 @@ function adminFun(player, message){ // !admin Anddyisthebest
 }
  
 function helpFun() { // !help
-    room.sendChat('Comandos: "!stats Jugador", "!ranking", "!topGoleadores", "!topAsistencias", "!resetstats" o "!poss"');
+    room.sendChat('Comandos: "!stats jogador", "!ranking", "!topgol", "!topassist", "!resetstats", "!poss"');
     return false;
 }
  
 function adminHelpFun() {
-    room.sendChat('Comandos: "!mute Jugador", "!unmute Jugador", ' +
-    '"!clearbans", "!swap" (para cambiar reds y blues), "!reset Jugador", "!resetall", "!marcardor", "!spam"');
+    room.sendChat('Comandos: "!mute jogador", "!unmute jogador", ' +
+    '"!clearbans", "!swap", "!reset jogador", "!resetall", "!marcador", "!spam"');
     return false;
 }
  
 function rankHelpFun() { // !rankhelp
     return false;
 }
- 
  
 function statsFun(player, message){ // !stats Anddy
     if (stats.get(message.substr(7))){
@@ -250,7 +273,7 @@ function rankFun() { // !ranking
     }
 }
  
-function asistenciasFun() { // !topAsistencias
+function asistenciasFun() { // !topassist
     if ( temp == false ){
         temp = true;
         setTimeout( function(){
@@ -261,7 +284,7 @@ function asistenciasFun() { // !topAsistencias
     }
 }
  
-function golesFun() { // !topGoleadores
+function golesFun() { // !topgol
     if ( temp == false ){
         temp = true;
         setTimeout( function(){
@@ -274,7 +297,7 @@ function golesFun() { // !topGoleadores
  
 function resetStatsFun (player){ // !resetstats
         stats.set(player.name, [0,0,0,0,0,0]);
-        room.sendChat("Stats resetados ")
+        room.sendChat("Stats resetados.")
 }
  
 function clearFun(player){ // !clearbans
@@ -326,7 +349,7 @@ function asistencias(){
  
     if ( overall3.length < 4 ) { room.sendChat("Não há jogadores o suficiente. "); return; }
     else if ( overall3.length >= 4 ){
-        room.sendChat("-- Top Asistencias --")
+        room.sendChat("- - - Top Assistências - - -")
         for (var i = 0; i < 4; i++) {
             if (overall3[i].value != 0){
                 room.sendChat( i+1 + ") " + overall3[i].name + ": " + overall3[i].value + " asis, ");
@@ -350,10 +373,10 @@ function goles(){
  
     if ( overall2.length < 4 ) { room.sendChat("Não há jogadores o suficiente. "); return; }
     else if ( overall2.length >= 4 ){
-        room.sendChat("-- Top Goleadores --")
+        room.sendChat("- - - Top Goleadores - - -")
         for (var i = 0; i < 4; i++) {
             if (overall2[i].value != 0){
-                room.sendChat( i+1 + ") " + overall2[i].name + ": " + overall2[i].value + " goles, ");
+                room.sendChat( i+1 + ") " + overall2[i].name + ": " + overall2[i].value + " gols, ");
             }
         }
     }
@@ -374,7 +397,7 @@ function ranking(){
    
     if ( overall.length < 4 ) { room.sendChat("Não há jogadores o suficiente. "); return; }
     else if ( overall.length >= 4 ){
-        room.sendChat("-- Top Pontuação --")
+        room.sendChat("- - - Top Geral - - -")
         for (var i = 0; i < 4; i++) {
             if (overall[i].value != 0){
                 room.sendChat( i+1 + ") " + overall[i].name + ": " + overall[i].value + " pts, ");
@@ -385,11 +408,10 @@ function ranking(){
  
 function sendStats(name){
     ps = stats.get(name); // stands for playerstats
-    room.sendChat(name + ": Goles: " + ps[0] + ", asistencias: " + ps[1]
-    + ", en contra: " + ps[4] + ", arco invicto: " + ps[5] + ", victorias: " + ps[2] + ", derrotas: " + ps[3] +
-    " puntos totales: " + rankingCalc(name));
+    room.sendChat(name + ": Gols: " + ps[0] + ", assistências: " + ps[1]
+    + ", contras: " + ps[4] + ", arco invicto: " + ps[5] + ", victórias: " + ps[2] + ", derrotas: " + ps[3] +
+    " total: " + rankingCalc(name));
 }
- 
  
 function whichTeam(){ // gives the players in the red or blue team
     var players = room.getPlayerList();
@@ -428,38 +450,15 @@ var redPoss;
 function teamPossFun(){
     if (room.getScores() == null) return false;
     bluePoss = 0;
-    redPoss = 0
+    redPoss = 0;
     ballCarrying.forEach(updateTeamPoss);
     redPoss = Math.round((redPoss / room.getScores().time) * 100);
     bluePoss = Math.round((bluePoss / room.getScores().time) * 100);
-    room.sendChat("Posessão de bola:  RED " + redPoss + "% - BLUE " + bluePoss + "% "  );
+    room.sendChat("Posse de bola:  RED " + redPoss + "% - BLUE " + bluePoss + "% "  );
  
 }
-var team;
-var championship = false;
-function startSetFun(player,msg){
-    championship = true;
-    
-    param = msg.split(" ");
 
-    red = param[1];
-    blue = param[2];
 
-    team = {red:{
-                name:red,
-                score:0
-            },
-            blue:{
-                name:blue,
-                score:0
-            }};
-
-    room.sendChat("Mais um jogo do Campeonato dos primos começará em breve!!");
-    room.sendChat("Jogadores se preparem que o administrador do campeonato os colocará nos times corretos!");
-    room.sendChat(red+" X "+blue);
-
- 
-}
  
  
  
@@ -522,13 +521,13 @@ function isOvertime(){
 var team_name = team => team == 1 ? "Blue" : "Red";
 
 // return: whether it's an OG
-var isOwnGoal = (team, player) => team != player.team ? " (En contra)" : ""; 
+var isOwnGoal = (team, player) => team != player.team ? " (contra)" : ""; 
  
 // return: a better display of the second when a goal is scored
 var floor = s => s < 10 ? "0" + s : s;
  
 // return: whether there's an assist
-var playerTouchedTwice = playerList => playerList[0].team == playerList[1].team ? " (Asistencia de " + playerList[1].name + ")" : "";
+var playerTouchedTwice = playerList => playerList[0].team == playerList[1].team ? " (Assistência de " + playerList[1].name + ")" : "";
  
 
 /*
@@ -558,8 +557,8 @@ var commands = {
     "!adminhelp": adminHelpFun,
     "!rankhelp": rankHelpFun,
     "!ranking": rankFun,
-    "!topGoleadores": golesFun,
-    "!topAsistencias": asistenciasFun,
+    "!topgol": golesFun,
+    "!topassist": asistenciasFun,
     "!poss": teamPossFun,
  
     // Command that need to know who is the player.
@@ -569,8 +568,8 @@ var commands = {
     "!resetall": resetAllFun,
     "!marcador": marcadorFun,
     "!spam": spamFun,    
-    "!gk": gkFun,
-    "!gkhelp": gkHelpFun,
+    // "!gk": gkFun,
+    // "!gkhelp": gkHelpFun,
  
     // Command that need to know if a player is admin.
     "!swap": swapFun,
@@ -603,7 +602,7 @@ room.onPlayerJoin = function(player) {
     clonekick(player);
     updateAdmins(); // Gives admin to the first player who join the room if there's no one
     initPlayerStats(player); // Set new player's stat
-   room.sendChat("Olá " + player.name + " ! Bem vindo ao Campeonato dos Primos!" )
+   room.sendChat("Olá " + player.name + " ! Bem-vindo à 1ª Copinha dos Primos!" )
 }
  
 var redTeam;
@@ -618,9 +617,9 @@ room.onGameStart = function() {
 
     if(championship){
         if(!secondSet){
-            room.sendChat("Jogo inciado! "+team.red.name+" X " +team.blue.name);
+            room.sendChat("Jogo iniciado! "+team.red.name+" x " +team.blue.name);
         }else{
-            room.sendChat("O Segundo tempo começou! "+team.red.name+" "+team.red.score+" X " +team.blue.score+" "+team.blue.name);
+            room.sendChat("O Segundo tempo começou! "+team.red.name+" "+team.red.score+" x " +team.blue.score+" "+team.blue.name);
 
         }
     }
@@ -634,8 +633,6 @@ room.onPlayerTeamChange = function(player){
     }
 }
  
- 
- 
 room.onPlayerChat = function(player, message) {
     if (mutedPlayers.includes(player.name)) return false;
     let spacePos = message.search(" ");
@@ -643,9 +640,6 @@ room.onPlayerChat = function(player, message) {
     if (commands.hasOwnProperty(command) == true) return commands[command](player, message);
  
 }
- 
- 
- 
  
 room.onPlayerBallKick = function (player){
     whoTouchedLast = player;
@@ -702,7 +696,7 @@ room.onGameTick = function() {
  
 room.onTeamGoal = function(teamGoal){ // Write on chat who scored and when.
  
-    room.sendChat("Goooooooooooooooooooollll!!!!!");
+    room.sendChat("Gooooooooooooooooooool!!!!");
 
     var time = room.getScores().time;
     var m = Math.trunc(time/60); var s = Math.trunc(time % 60);
@@ -730,7 +724,7 @@ room.onTeamGoal = function(teamGoal){ // Write on chat who scored and when.
             teamGoalName = team.red.name;
         }
 
-        room.sendChat(team.red.name + " "+ team.red.score + " X " + team.blue.score + " " + team.blue.name);
+        room.sendChat(team.red.name + " "+ team.red.score + " x " + team.blue.score + " " + team.blue.name);
 
 
     }
@@ -743,7 +737,6 @@ room.onTeamGoal = function(teamGoal){ // Write on chat who scored and when.
     whoTouchedBall = [init, init];
     whoTouchedLast = undefined;
 }
- 
  
  var swap = false;
 room.onTeamVictory = function(scores){ // Sum up all scorers since the beginning of the match.
@@ -818,7 +811,5 @@ room.onGameStop = function(){
  
  
  
- 
- 
- 
 // Made by Grandes Ligas HaxBall
+// Editado por ianzinho e bilbo

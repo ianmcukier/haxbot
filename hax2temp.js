@@ -15,8 +15,8 @@ Steps:
 geo = {"code": "br"}
 var room = HBInit({ roomName: "Campeonato dos Primos", maxPlayers: 30, password:"coronga", playerName : "Primo", public : false, geo});
 room.setDefaultStadium("Classic");
-room.setScoreLimit(3);
-room.setTimeLimit(1);
+room.setScoreLimit(0);
+room.setTimeLimit(3);
  
  
 /*

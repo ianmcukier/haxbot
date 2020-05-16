@@ -12,7 +12,7 @@ Steps:
     5) IF THIS TAB IS CLOSED THE ROOM WILL BE CLOSED TOO
 */
 geo = {"code": "br"};
-var room = HBInit({ roomName: "1ª Copinha dos Primos", 
+var room = HBInit({ roomName: "Copa Edmundo XIII", 
                     maxPlayers: 12, 
                     password:"coronga", 
                     playerName : "Primo",
@@ -145,11 +145,11 @@ function swapSet(){
             }
         }
         try {
-            room.sendChat("/colors red " + teamsUniforms[team[blue][name]]) // SET RED TEAM UNIFORM
-            room.sendChat("/colors blue " + teamsUniforms[team[red][name]]) // SET BLUE TEAM UNIFORM
+            // room.sendChat("/colors red " + teamsUniforms[team[blue][name]]) // SET RED TEAM UNIFORM
+            // room.sendChat("/colors blue " + teamsUniforms[team[red][name]]) // SET BLUE TEAM UNIFORM
         }
         catch (err){
-            room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
+            // room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
         }
     }
     
@@ -174,11 +174,11 @@ var team;
 var championship = false;
 function startSetFun(player,msg){ // the teams names received in msg must match exactly with the names at teamsUniforms dict ("team1 team2")
     championship = true;
-    
-    param = msg.split(" ");
+    sub = msg.substr(msg.indexOf(' ')+1);
+    param = sub.split(" x ");
 
-    red = param[1]; 
-    blue = param[2];
+    red = param[0]; 
+    blue = param[1];
 
     team = {red:{
                 name:red,
@@ -189,15 +189,15 @@ function startSetFun(player,msg){ // the teams names received in msg must match 
                 score:0
             }};
 
-    try {
-        room.sendChat("/colors red " + teamsUniforms[red]) // SET RED TEAM UNIFORM
-        room.sendChat("/colors blue " + teamsUniforms[blue]) // SET BLUE TEAM UNIFORM
-    }
-    catch (err){
-        room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
-    }
+    // try {
+    //     // room.sendChat("/colors red " + teamsUniforms[red]) // SET RED TEAM UNIFORM
+    //     // room.sendChat("/colors blue " + teamsUniforms[blue]) // SET BLUE TEAM UNIFORM
+    // }
+    // catch (err){
+    //     room.sendChat("Não foi possivel setar o uniforme de algum dos times.")
+    // }
 
-    room.sendChat("Mais um jogo do Campeonato dos primos começará em breve!!");
+    room.sendChat("Mais um jogo da Copa Edmundo XIII começará em breve!!");
     room.sendChat("Jogadores se preparem que o administrador do campeonato os colocará nos times corretos!");
     room.sendChat(red+" x "+blue);
 
@@ -491,6 +491,8 @@ function resetSet(){
     team = null;
     endSet = false;
     secondSet = false;
+    room.sendChat("Partida finalizada" )
+
 }
  
  
@@ -585,7 +587,8 @@ var commands = {
 
     // Campeonato
     "!startset":startSetFun,
-    "!placar":placarFun
+    "!placar":placarFun,
+    "!reset":resetSet
  
 }
  
@@ -602,7 +605,7 @@ room.onPlayerJoin = function(player) {
     clonekick(player);
     updateAdmins(); // Gives admin to the first player who join the room if there's no one
     initPlayerStats(player); // Set new player's stat
-   room.sendChat("Olá " + player.name + " ! Bem-vindo à 1ª Copinha dos Primos!" )
+   room.sendChat("Olá " + player.name + " ! Bem-vindo à Copa Edmundo XIII!" )
 }
  
 var redTeam;
@@ -695,7 +698,7 @@ room.onGameTick = function() {
 }
  
 room.onTeamGoal = function(teamGoal){ // Write on chat who scored and when.
- 
+    console.log('entrei aqui');
     room.sendChat("Gooooooooooooooooooool!!!!");
 
     var time = room.getScores().time;
@@ -789,13 +792,12 @@ room.onGameStop = function(){
 
         if(endSet == true){
             if(team.blue.score>team.red.score){
-                room.sendChat("Vitória do time "+team.blue.name+"!")
+                room.sendChat("Vitória do time "+team.blue.name+" de "+team.blue.score+" a "+team.red.score+"!")
                 
             }else{
-                room.sendChat("Vitória do time "+team.red.name+"!")
+                room.sendChat("Vitória do time "+team.red.name+" de "+team.red.score+" a "+team.blue.score+"!")
             }
             resetSet();
-            room.sendChat("Digite !startset para começar um novo set.");
         }
     }
 
